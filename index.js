@@ -1821,7 +1821,43 @@ function updateHOCHostEl({ vnode, parent }, el) {
     }
   }
 }
+const COMPONENTS = "components";
 const NULL_DYNAMIC_COMPONENT = Symbol.for("v-ndc");
+function resolveDynamicComponent(component) {
+  if (isString(component)) {
+    return resolveAsset(COMPONENTS, component, false) || component;
+  } else {
+    return component || NULL_DYNAMIC_COMPONENT;
+  }
+}
+function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false) {
+  const instance = currentRenderingInstance || currentInstance;
+  if (instance) {
+    const Component = instance.type;
+    {
+      const selfName = getComponentName(
+        Component,
+        false
+      );
+      if (selfName && (selfName === name || selfName === camelize(name) || selfName === capitalize(camelize(name)))) {
+        return Component;
+      }
+    }
+    const res = (
+      // local registration
+      // check instance[type] first which is resolved for options API
+      resolve(instance[type] || Component[type], name) || // global registration
+      resolve(instance.appContext[type], name)
+    );
+    if (!res && maybeSelfReference) {
+      return Component;
+    }
+    return res;
+  }
+}
+function resolve(registry, name) {
+  return registry && (registry[name] || registry[camelize(name)] || registry[capitalize(camelize(name))]);
+}
 const isSuspense = (type) => type.__isSuspense;
 function queueEffectWithSuspense(fn, suspense) {
   if (suspense && suspense.pendingBranch) {
@@ -7477,29 +7513,59 @@ const _hoisted_2 = { class: "page" };
 const _sfc_main = {
   __name: "App",
   setup(__props) {
+    const keys = {
+      method: "method",
+      request: "request",
+      response: "response",
+      info: "info"
+    };
     const data = ref({});
     const tabs = ref([
-      { name: "Бодя", contentKey: "request", selected: true },
-      { name: "Ответ", contentKey: "response", selected: false },
-      { name: "Информация", contentKey: "info", selected: false }
+      { name: "Бодя", contentKey: keys.request, selected: true },
+      { name: "Ответ", contentKey: keys.response, selected: false },
+      { name: "Информация", contentKey: keys.info, selected: false }
     ]);
     const selectedGroupId = ref(null);
     const methods = computed(() => {
       const result = [];
-      for (let id in data.value) {
+      for (const id in data.value) {
         const method = Object.assign(
           {
             groupId: id,
             active: id === selectedGroupId.value
           },
-          data.value[id].method
+          data.value[id][keys.method]
         );
         result.push(method);
       }
       return result;
     });
-    const selectedItem = computed(() => data.value[selectedGroupId.value] || null);
-    const selectedContentTab = computed(() => tabs.value.find((t2) => t2.selected));
+    const selectedItem = computed(() => data.value[selectedGroupId.value]);
+    const selectedTab = computed(() => tabs.value.find((tab) => tab.selected) ?? {});
+    const tabComponent = computed(() => {
+      const selectedItemContentByKey = selectedItem.value[selectedTab.value.contentKey];
+      const components = {
+        [keys.request]: {
+          name: JsonView,
+          props: {
+            json: selectedItemContentByKey
+          }
+        },
+        [keys.response]: {
+          name: JsonView,
+          props: {
+            json: selectedItemContentByKey
+          }
+        },
+        [keys.info]: {
+          name: Info,
+          props: {
+            items: selectedItemContentByKey
+          }
+        }
+      };
+      return components[selectedTab.value.contentKey];
+    });
     const onClickMethod = ({ groupId }) => {
       selectedGroupId.value = groupId;
     };
@@ -7527,10 +7593,10 @@ const _sfc_main = {
           }
         ];
         data.value[v4()] = {
-          method,
-          request: postData,
-          response,
-          info
+          [keys.method]: method,
+          [keys.request]: postData,
+          [keys.response]: response,
+          [keys.info]: info
         };
       };
       initExtention(() => {
@@ -7550,18 +7616,9 @@ const _sfc_main = {
             onOnClickTab: onClickContentTab
           }, {
             default: withCtx(() => [
-              selectedContentTab.value.contentKey === "request" ? (openBlock(), createBlock(JsonView, {
-                key: 0,
-                json: selectedItem.value[selectedContentTab.value.contentKey]
-              }, null, 8, ["json"])) : createCommentVNode("", true),
-              selectedContentTab.value.contentKey === "response" ? (openBlock(), createBlock(JsonView, {
-                key: 1,
-                json: selectedItem.value[selectedContentTab.value.contentKey]
-              }, null, 8, ["json"])) : createCommentVNode("", true),
-              selectedContentTab.value.contentKey === "info" ? (openBlock(), createBlock(Info, {
-                key: 2,
-                items: selectedItem.value[selectedContentTab.value.contentKey]
-              }, null, 8, ["items"])) : createCommentVNode("", true)
+              tabComponent.value ? (openBlock(), createBlock(resolveDynamicComponent(tabComponent.value.name), mergeProps({
+                key: selectedGroupId.value + selectedTab.value.contentKey
+              }, tabComponent.value.props), null, 16)) : createCommentVNode("", true)
             ]),
             _: 1
           }, 8, ["tabs"])) : createCommentVNode("", true)
@@ -7570,5 +7627,5 @@ const _sfc_main = {
     };
   }
 };
-const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-fbbdcf35"]]);
+const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-bfe13b87"]]);
 createApp(App).mount("#app");
