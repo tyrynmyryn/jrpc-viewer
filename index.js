@@ -5790,6 +5790,13 @@ const handleCopy = (content) => {
   document.execCommand("copy");
   document.body.removeChild(temp);
 };
+const getParsedTime = () => {
+  const date = /* @__PURE__ */ new Date();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -7507,12 +7514,11 @@ const _sfc_main = {
     onMounted(() => {
       const afterRequest = (request, content) => {
         var _a, _b, _c;
-        const date = /* @__PURE__ */ new Date();
         const response = JSON.parse(content);
         const postData = JSON.parse((_b = (_a = request.request) == null ? void 0 : _a.postData) == null ? void 0 : _b.text);
         const method = {
           name: postData.method,
-          time: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+          time: getParsedTime()
         };
         const info = [
           {
@@ -7564,5 +7570,5 @@ const _sfc_main = {
     };
   }
 };
-const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-79d60b39"]]);
+const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-fbbdcf35"]]);
 createApp(App).mount("#app");

@@ -249,10 +249,10 @@ mark.active {
     color: var(--color-main);
 }
 
-.container[data-v-79d60b39] {
+.container[data-v-fbbdcf35] {
     width: 100%;
 }
-.page[data-v-79d60b39] {
+.page[data-v-fbbdcf35] {
     display: grid;
     grid-template-columns: 1fr 3fr;
 }
