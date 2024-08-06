@@ -10,5 +10,18 @@
     "128": "icon.png"
   },
   "devtools_page": "index.html",
-  "permissions": ["tabs", "activeTab"]
+  "permissions": ["tabs", "activeTab", "webRequest"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Go to"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
 }
