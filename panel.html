@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JRPC Viewer</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <main class="app">
+      <aside class="sidebar">
+        <header class="sidebar-header">
+          <div class="title-row">
+            <h1>Запросы <span id="request-count" class="request-count">0</span></h1>
+            <button id="clear-button" class="icon-button" type="button" title="Очистить список" aria-label="Очистить список">🗑</button>
+          </div>
+          <label class="filter-field">
+            <span class="sr-only">Поиск</span>
+            <input id="search-input" type="search" placeholder="Метод, ответ, URL..." autocomplete="off" />
+          </label>
+          <label class="filter-field">
+            <span class="sr-only">Сервис в URL</span>
+            <input id="service-input" type="search" placeholder="Сервис в Request URL..." list="service-options" autocomplete="off" />
+            <datalist id="service-options"></datalist>
+          </label>
+        </header>
+        <div id="request-list" class="request-list"></div>
+      </aside>
+
+      <section class="details">
+        <div id="empty-state" class="empty-state">JSON-RPC запросы появятся здесь сразу после отправки</div>
+        <div id="details-content" class="details-content hidden">
+          <header class="details-header">
+            <nav class="tabs" aria-label="Данные запроса">
+              <button class="tab active" data-tab="request" type="button">Запрос</button>
+              <button class="tab" data-tab="response" type="button">Ответ</button>
+              <button class="tab" data-tab="info" type="button">Информация</button>
+            </nav>
+            <div class="tab-actions">
+              <button id="copy-curl-button" class="primary-button" type="button" disabled>Копировать cURL</button>
+              <button id="copy-json-button" class="secondary-button" type="button" disabled>Копировать JSON</button>
+            </div>
+          </header>
+          <div id="request-panel" class="tab-panel"></div>
+          <div id="response-panel" class="tab-panel hidden"></div>
+          <div id="info-panel" class="tab-panel hidden"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="panel.js"></script>
+  </body>
+</html>
